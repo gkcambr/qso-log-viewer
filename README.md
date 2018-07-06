@@ -2,6 +2,7 @@
 An application that analyzes ham radio logbooks for duplicate and missing records
 
 Requires a current Java Run-time environment. Download QsoLogServer.jar and invoke the application with:
+
 java -jar QsoLogViewer.jar
 
 Description:
