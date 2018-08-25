@@ -26,6 +26,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Stack;
@@ -55,6 +56,7 @@ public class QsoActionMenu extends QsoMenu {
     }
 
     @Override
+    @SuppressWarnings("Convert2Lambda")
     final void createMenu() {
         setText("Action");
         setMnemonic(KeyEvent.VK_A);
@@ -62,6 +64,13 @@ public class QsoActionMenu extends QsoMenu {
         // create the rules map
         if (_rulesMap == null) {
             _rulesMap = new LinkedHashMap<>();
+            setRulesToDefaults();
+        }
+
+        // create the states map
+        if (_statesMap == null) {
+            _statesMap = new LinkedHashMap<>();
+            initStatesMap();
             setRulesToDefaults();
         }
 
@@ -355,9 +364,83 @@ public class QsoActionMenu extends QsoMenu {
             }
         }
         );
-        _compareRulesItem.setEnabled(
-                false);
-        add(_compareRulesItem);
+
+        // create the states check menu item
+        _statesCheckItem = new JMenuItem("Check All States", null);
+        _statesCheckItem.setMnemonic(KeyEvent.VK_S);
+        _statesCheckItem.setToolTipText("Check all states");
+        _statesCheckItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                QsoFile openFile = ((QsoPane) _logWindow.getContentPane()).getQsoFile();
+
+                // reset the states map
+                Iterator<String> it = _statesMap.keySet().iterator();
+                while (it.hasNext()) {
+                    String state = it.next();
+                    _statesMap.replace(state, 0);
+                }
+                // count occurances of each state
+                Iterator<QsoRecord> ofit = openFile._records.iterator(); 
+                while(ofit.hasNext()) {
+                    QsoRecord rec = ofit.next();
+                    String state;
+                    try {
+                        state = rec.getValue("STATE").trim();
+                    } catch (NullPointerException ex) {
+                        // skip this record
+                        continue;
+                    }
+                    if(state.length() > 2) {
+                        // lotw uses 'MO //Missouri' for a state format
+                        state = state.substring(0,2);
+                    }
+                    if (state != null
+                            && state.length() == 2
+                            && _statesMap.containsKey(state)) {
+                        Integer cnt = _statesMap.get(state);
+                        cnt += 1;
+                        _statesMap.replace(state, cnt);
+                    }
+                }
+                // show the results
+                String notice;
+                String missing = "";
+                int noMissing = 0;
+                it = _statesMap.keySet().iterator();
+                while (it.hasNext()) {
+                    String state = it.next();
+                    if (_statesMap.get(state) == 0) {
+                        if (missing.length() < 1) {
+                            missing = state;
+                        } else {
+                            missing = missing + "," + state;
+                        }
+                        noMissing += 1;
+                        if (noMissing % 8 == 0) {
+                            missing = missing + "\n";
+                        }
+                    }
+                }
+                switch (noMissing) {
+                    case 0:
+                        notice = "All states were found. Congratulations!";
+                        break;
+                    case 1:
+                        notice = "One state is missing.\n" + missing;
+                        break;
+                    default:
+                        notice = "" + noMissing + " states are missing.\n" + missing;
+                        break;
+                }
+                JOptionPane.showOptionDialog(null, notice, "Information",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                        null, null, null);
+            }
+        }
+        );
+        _statesCheckItem.setEnabled(false);
+        add(_statesCheckItem);
     }
 
     int checkForDuplicates(boolean markDupes) {
@@ -365,7 +448,9 @@ public class QsoActionMenu extends QsoMenu {
 
         // find duplicate records in openFile, 
         // use call sign and other variables set by the Choose Rules panel/option
-        TreeMap<String, QsoRecord> dupeRecords = new TreeMap<>();
+        TreeMap<String, QsoRecord> dupeRecords = new 
+        
+        TreeMap<>();
         for (QsoRecord rec : openFile._records) {
             String recCallSign;
             String recBand;
@@ -427,10 +512,10 @@ public class QsoActionMenu extends QsoMenu {
                     String matchTime = matchRec.getValue("TIME_ON").trim();
                     int timeDiff;
                     try {
-                        if (matchTime == null || 
-                                (matchTime.length() != 6 && matchTime.length() != 4)
-                                || recTime == null || 
-                                (recTime.length() != 6 && recTime.length() != 4)) {
+                        if (matchTime == null
+                                || (matchTime.length() != 6 && matchTime.length() != 4)
+                                || recTime == null
+                                || (recTime.length() != 6 && recTime.length() != 4)) {
                             continue;
                         }
                         int recMins = Integer.parseInt(recTime.substring(2, 4));
@@ -488,12 +573,11 @@ public class QsoActionMenu extends QsoMenu {
 
             // show the results
             String notice;
-            if(noDupes > 0) {
+            if (noDupes > 0) {
                 notice = "" + noDupes + " duplicates were found and highlighted in the table.\n"
-                    + "Sort the table by call sign to group them.";
-            }
-            else {
-               notice = "" + noDupes + " duplicates were found and highlighted in the table."; 
+                        + "Sort the table by call sign to group them.";
+            } else {
+                notice = "" + noDupes + " duplicates were found and highlighted in the table.";
             }
             JOptionPane.showOptionDialog(null, notice, "Information",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
@@ -503,7 +587,8 @@ public class QsoActionMenu extends QsoMenu {
         return noDupes;
     }
 
-    void compareQsoFile(QsoFile compareFile) {
+    void compareQsoFile(QsoFile compareFile
+    ) {
         QsoFile openFile = ((QsoPane) _logWindow.getContentPane()).getQsoFile();
 
         // check for duplicates before beginning
@@ -531,7 +616,7 @@ public class QsoActionMenu extends QsoMenu {
             String recTime = rec.getValue("TIME_ON").trim();
             Stack<QsoRecord> compareRecs = compareFile.getRecords();
             Stack<QsoRecord> compareMatches = new Stack<>();
-            
+
             // filter using call first
             if (_rulesMap.get("CALL").equals(USE_RULE)) {
                 compareMatches = openFile.locateRecords("CALL", recCallSign, compareRecs);
@@ -581,10 +666,10 @@ public class QsoActionMenu extends QsoMenu {
                     String matchTime = matchRec.getValue("TIME_ON").trim();
                     int timeDiff;
                     try {
-                         if (matchTime == null || 
-                                (matchTime.length() != 6 && matchTime.length() != 4)
-                                || recTime == null || 
-                                (recTime.length() != 6 && recTime.length() != 4)) {
+                        if (matchTime == null
+                                || (matchTime.length() != 6 && matchTime.length() != 4)
+                                || recTime == null
+                                || (recTime.length() != 6 && recTime.length() != 4)) {
                             continue;
                         }
                         int recMins = Integer.parseInt(recTime.substring(2, 4));
@@ -656,11 +741,13 @@ public class QsoActionMenu extends QsoMenu {
             _dupeCheckItem.setEnabled(true);
             _columnEditItem.setEnabled(true);
             _compareRulesItem.setEnabled(true);
+            _statesCheckItem.setEnabled(true);
         } else {
             _fileCompareItem.setEnabled(false);
             _dupeCheckItem.setEnabled(false);
             _columnEditItem.setEnabled(false);
-            _compareRulesItem.setEnabled(false);
+            _compareRulesItem.setEnabled(true);
+            _statesCheckItem.setEnabled(true);
         }
     }
 
@@ -672,12 +759,26 @@ public class QsoActionMenu extends QsoMenu {
         _rulesMap.put("TIME_ON", USE_RULE);
         _rulesMap.put("TIME_DIFF", DEFAULT_TIME_DIFF);
     }
+
+    void initStatesMap() {
+        String[] stateList = {"AL", "AK", "AZ", "AR", "CA", "CO", "CT",
+            "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY",
+            "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE",
+            "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR",
+            "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA",
+            "WV", "WI", "WY"};
+        for (String state : stateList) {
+            _statesMap.put(state, 0);
+        }
+    }
     // Properties
     private JMenuItem _fileCompareItem;
     private JMenuItem _dupeCheckItem;
     private JMenuItem _columnEditItem;
     private JMenuItem _compareRulesItem;
+    private JMenuItem _statesCheckItem;
     private static LinkedHashMap<String, Integer> _rulesMap;
+    private LinkedHashMap<String, Integer> _statesMap;
     private LinkedHashMap<String, JCheckBox> _checkBoxList;
     private static JSpinner _timeSpinner;
     private static final Integer USE_RULE = -1;

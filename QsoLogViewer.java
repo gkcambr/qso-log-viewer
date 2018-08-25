@@ -27,11 +27,7 @@ public class QsoLogViewer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
-        if(args.length > 2) {
-            System.err.print("invalid argument count, greater than two");
-            System.exit(1);
-        }
+       
         QsoInitFile initFile = QsoInitFile.getInstance();
         initFile.open();
         QsoLogWindow logWin = new QsoLogWindow(null);
