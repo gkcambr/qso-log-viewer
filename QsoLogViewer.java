@@ -28,6 +28,10 @@ public class QsoLogViewer {
      */
     public static void main(String[] args) {
        
+        if(args.length == 1 && args[0].contains("-v")) {
+            System.out.println(VERSION);
+            System.exit(0);
+        }
         QsoInitFile initFile = QsoInitFile.getInstance();
         initFile.open();
         QsoLogWindow logWin = new QsoLogWindow(null);
@@ -35,7 +39,7 @@ public class QsoLogViewer {
     }
     
     // Properties
-    public static final String VERSION = "QsoLogViewer 1.0.1";
+    public static final String VERSION = "QsoLogViewer 1.0.2";
     public static final String AUTHOR = "by G. Keith Cambron KC1ATT";
     public static final String WEBSITE = "www.radiocheck.us";
 }
