@@ -374,6 +374,26 @@ public class QsoActionMenu extends QsoMenu {
             public void actionPerformed(ActionEvent event) {
                 QsoFile openFile = ((QsoPane) _logWindow.getContentPane()).getQsoFile();
 
+                // check for state and confirmation status fields
+                if (!openFile.containsField("STATE")) {
+                    // can't check this file
+                    JOptionPane.showOptionDialog(null, "This file does not contain state information.\n"
+                            + "All States Worked cannot be checked.", "Information",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                            null, null, null);
+                    return;
+                }
+                boolean checkStatusInfo = false;
+                if (openFile.containsField("APP_QRZLOG_STATUS")) {
+                    Object[] options = {"CONFIRMED ONLY", "ALL LOGGED QSOs"};
+                    int opt = JOptionPane.showOptionDialog(null, "Click one to continue", "Option",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,
+                            null, options, options[0]);
+                    if (opt == 0) {
+                        checkStatusInfo = true;
+                    }
+                }
+
                 // reset the states map
                 Iterator<String> it = _statesMap.keySet().iterator();
                 while (it.hasNext()) {
@@ -381,19 +401,25 @@ public class QsoActionMenu extends QsoMenu {
                     _statesMap.replace(state, 0);
                 }
                 // count occurances of each state
-                Iterator<QsoRecord> ofit = openFile._records.iterator(); 
-                while(ofit.hasNext()) {
+                Iterator<QsoRecord> ofit = openFile._records.iterator();
+                while (ofit.hasNext()) {
                     QsoRecord rec = ofit.next();
-                    String state;
+                    String state, status;
                     try {
                         state = rec.getValue("STATE").trim();
+                        if (checkStatusInfo) {
+                            status = rec.getValue("APP_QRZLOG_STATUS").trim();
+                            if (!status.equalsIgnoreCase("c")) {
+                                continue;
+                            }
+                        }
                     } catch (NullPointerException ex) {
                         // skip this record
                         continue;
                     }
-                    if(state.length() > 2) {
+                    if (state.length() > 2) {
                         // lotw uses 'MO //Missouri' for a state format
-                        state = state.substring(0,2);
+                        state = state.substring(0, 2);
                     }
                     if (state != null
                             && state.length() == 2
@@ -448,9 +474,7 @@ public class QsoActionMenu extends QsoMenu {
 
         // find duplicate records in openFile, 
         // use call sign and other variables set by the Choose Rules panel/option
-        TreeMap<String, QsoRecord> dupeRecords = new 
-        
-        TreeMap<>();
+        TreeMap<String, QsoRecord> dupeRecords = new TreeMap<>();
         for (QsoRecord rec : openFile._records) {
             String recCallSign;
             String recBand;

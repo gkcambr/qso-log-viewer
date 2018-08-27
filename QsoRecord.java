@@ -30,7 +30,7 @@ import java.util.Set;
 public class QsoRecord {
 
     private QsoRecord() {
-        this._map = new LinkedHashMap<>();
+        this._fields = new LinkedHashMap<>();
         // private constructor
     }
 
@@ -79,7 +79,7 @@ public class QsoRecord {
                     if (len != value4test.length()) {
                         throw (new NumberFormatException("tag " + tag[0] + " length does not match value length:\n" + recStr));
                     }
-                    _map.put(id, values[n]);
+                    _fields.put(id, values[n]);
                 }
             }
         }
@@ -88,14 +88,14 @@ public class QsoRecord {
     }
 
     public int getSize() {
-        return _map.size();
+        return _fields.size();
     }
 
     public String getValue(int indx) {
         String str = null;
 
-        if (_map != null) {
-            Collection<String> col = _map.values();
+        if (_fields != null) {
+            Collection<String> col = _fields.values();
             String[] vals = new String[col.size()];
             Iterator it = col.iterator();
             int i = 0;
@@ -111,10 +111,10 @@ public class QsoRecord {
     public String getValue(String key) {
         String str = null;
 
-        if (_map != null) {
-            str = _map.get(key.toLowerCase());
+        if (_fields != null) {
+            str = _fields.get(key.toLowerCase());
             if (str == null) {
-                str = _map.get(key.toUpperCase());
+                str = _fields.get(key.toUpperCase());
             }
         }
 
@@ -124,8 +124,8 @@ public class QsoRecord {
     public String[] getKeys() {
         String[] keys = null;
 
-        if (_map != null) {
-            Set<String> set = _map.keySet();
+        if (_fields != null) {
+            Set<String> set = _fields.keySet();
             keys = new String[set.size()];
             Iterator it = set.iterator();
             int i = 0;
@@ -143,9 +143,24 @@ public class QsoRecord {
     String getIndex() {
         return _recIndex;
     }
+    
+    
+    boolean containsField(String key) {
+        boolean ret = false;
+        
+        String ucKey = key.toUpperCase();
+        String lcKey = key.toLowerCase();
+        if(_fields.containsKey(ucKey)) {
+            ret = true;
+        }
+        if(_fields.containsKey(lcKey)) {
+            ret = true;
+        }
+        return ret;
+    }
 
     // Properties
-    private final LinkedHashMap<String, String> _map;
+    private final LinkedHashMap<String, String> _fields;
     private String _recIndex;
     static BufferedWriter _wrtr = null;
 }

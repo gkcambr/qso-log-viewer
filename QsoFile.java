@@ -100,6 +100,21 @@ abstract class QsoFile {
         }
         return rec;
     }
+    
+    public 
+    boolean containsField(String key) {
+        boolean ret = false;
+        
+        String ucKey = key.toUpperCase();
+        String lcKey = key.toLowerCase();
+        if(_columnNames.contains(ucKey)) {
+            ret = true;
+        }
+        if(_columnNames.contains(lcKey)) {
+            ret = true;
+        }
+        return ret;
+    }
 
     public Stack<QsoRecord> locateRecords(String columnName,
             String columnValue,

@@ -39,7 +39,7 @@ public class QsoLogViewer {
     }
     
     // Properties
-    public static final String VERSION = "QsoLogViewer 1.0.2";
+    public static final String VERSION = "QsoLogViewer 1.0.3";
     public static final String AUTHOR = "by G. Keith Cambron KC1ATT";
     public static final String WEBSITE = "www.radiocheck.us";
 }
