@@ -16,6 +16,7 @@
  */
 package qsologviewer;
 
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,8 +24,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -37,6 +42,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.text.Document;
+import javax.swing.text.html.HTMLEditorKit;
 
 /**
  *
@@ -139,45 +146,28 @@ public class QsoLogWindow extends JFrame {
         helpFileMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                try {
-                    URL helpUrl = this.getClass().getResource("/qsologviewer");
-                    if (helpUrl == null) {
-                        throw (new IOException("help not supported on this host"));
+                // create the help window
+                JFrame helpFrame = new JFrame();
+                ArrayList<Image> imageList = getImages();
+                helpFrame.setIconImages(imageList);
+                helpFrame.setTitle("Help File");
+                helpFrame.setSize(600, 400);
+                JEditorPane htmlPane = new JEditorPane();
+                htmlPane.setEditable(false);
+                JScrollPane scrollPane = new JScrollPane(htmlPane);
+                HTMLEditorKit htmlKit = new HTMLEditorKit();
+                htmlPane.setEditorKit(htmlKit);
+                htmlPane.setContentType("text/html");
+                if (Desktop.isDesktopSupported()) {
+                    try {
+                        URL helpUrl;
+                        helpUrl = getClass().getResource("/QsoLogViewerHelp.html");
+                        Desktop.getDesktop().browse(helpUrl.toURI());
+                    } catch (IOException | URISyntaxException ex) {
+                        JOptionPane.showInternalMessageDialog(getContentPane(),
+                                "Help is not supported on this host\n" + ex,
+                                "Help file", JOptionPane.PLAIN_MESSAGE);
                     }
-                    File hf = new File(helpUrl.getFile());
-                    String docPath = hf.toString().replaceFirst("QsoLogViewer\\.jar.*", "");
-                    if (docPath == null) {
-                        throw (new IOException("help not supported on this host"));
-                    }
-                    docPath = docPath.concat("docs" + File.separator);
-                    docPath = docPath.concat("QsoLogViewerHelp.html");
-                    docPath = docPath.replaceFirst("file:.", "");
-                    docPath = docPath.replaceAll("%20", " ");
-                    File helpFile = new File(docPath);
-                    if (helpFile.exists() && helpFile.isFile()) {
-                        // create the help window
-                        JFrame helpFrame = new JFrame();
-                        ArrayList<Image> imageList = getImages();
-                        helpFrame.setIconImages(imageList);
-                        helpFrame.setTitle("Help File");
-                        helpFrame.setSize(600, 400);
-                        JEditorPane ep = new JEditorPane();
-                        ep.setPage(helpFile.toURI().toURL());
-                        ep.setEditable(false);
-                        JScrollPane epScrollPane = new JScrollPane(ep);
-                        epScrollPane.setVerticalScrollBarPolicy(
-                                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-                        epScrollPane.setHorizontalScrollBarPolicy(
-                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                        helpFrame.getContentPane().add(epScrollPane);
-                        helpFrame.setVisible(true);
-                    } else {
-                        throw (new IOException("file not found"));
-                    }
-                } catch (IOException ex) {
-                    JOptionPane.showInternalMessageDialog(getContentPane(),
-                            "Help is not supported on this host\n" + ex,
-                            "Help file", JOptionPane.PLAIN_MESSAGE);
                 }
             }
         });
