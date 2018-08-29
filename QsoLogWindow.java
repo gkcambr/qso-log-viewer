@@ -16,6 +16,7 @@
  */
 package qsologviewer;
 
+import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -146,27 +147,62 @@ public class QsoLogWindow extends JFrame {
         helpFileMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                // create the help window
-                JFrame helpFrame = new JFrame();
-                ArrayList<Image> imageList = getImages();
-                helpFrame.setIconImages(imageList);
-                helpFrame.setTitle("Help File");
-                helpFrame.setSize(600, 400);
-                JEditorPane htmlPane = new JEditorPane();
-                htmlPane.setEditable(false);
-                JScrollPane scrollPane = new JScrollPane(htmlPane);
-                HTMLEditorKit htmlKit = new HTMLEditorKit();
-                htmlPane.setEditorKit(htmlKit);
-                htmlPane.setContentType("text/html");
+
+                // try to launch in the local browser
                 if (Desktop.isDesktopSupported()) {
                     try {
                         URL helpUrl;
                         helpUrl = getClass().getResource("/QsoLogViewerHelp.html");
                         Desktop.getDesktop().browse(helpUrl.toURI());
                     } catch (IOException | URISyntaxException ex) {
-                        JOptionPane.showInternalMessageDialog(getContentPane(),
-                                "Help is not supported on this host\n" + ex,
-                                "Help file", JOptionPane.PLAIN_MESSAGE);
+                        try {
+                            // local launch didn't work!
+                            // create the help window
+
+                            JFrame helpFrame = new JFrame();
+                            ArrayList<Image> imageList = getImages();
+                            helpFrame.setIconImages(imageList);
+                            helpFrame.setTitle("Help File");
+                            helpFrame.setSize(600, 400);
+
+                            JEditorPane htmlPane = new JEditorPane();
+                            htmlPane.setEditable(false);
+                            JScrollPane scrollPane = new JScrollPane(htmlPane);
+                            HTMLEditorKit htmlKit = new HTMLEditorKit();
+                            htmlPane.setEditorKit(htmlKit);
+                            htmlPane.setContentType("text/html");
+
+                            BufferedReader txtReader = new BufferedReader(
+                                    new InputStreamReader(
+                                            getClass().getResourceAsStream("/QsoLogViewerHelp.html")));
+                            String helpLine = txtReader.readLine();
+                            String htmlText = "";
+                            boolean headSection = false;
+                            while (helpLine != null) {
+                                if (headSection == false && helpLine.contains("HEAD")) {
+                                    headSection = true;
+                                    helpLine = txtReader.readLine();
+                                    continue;
+                                }
+                                if (headSection == false) {
+                                    htmlText = htmlText.concat(helpLine + "\n");
+                                }
+                                if (headSection == true && helpLine.contains("HEAD")) {
+                                    headSection = false;
+                                }
+                                helpLine = txtReader.readLine();
+                            }
+                            Document doc = htmlKit.createDefaultDocument();
+                            htmlPane.setDocument(doc);
+                            htmlPane.setText(htmlText);
+                            helpFrame.getContentPane().add(scrollPane);
+                            helpFrame.setVisible(true);
+
+                        } catch (IOException exio) {
+                            JOptionPane.showInternalMessageDialog(getContentPane(),
+                                    "Help is not supported on this host\n" + exio,
+                                    "Help file", JOptionPane.PLAIN_MESSAGE);
+                        }
                     }
                 }
             }
