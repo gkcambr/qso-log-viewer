@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2018 G. Keith Cambron
  *
@@ -188,7 +189,7 @@ public class QsoActionMenu extends QsoMenu {
                 }
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("AIDF images", "adi");
                 chooser.setFileFilter(filter);
-                int returnVal = chooser.showOpenDialog(null);
+                int returnVal = chooser.showOpenDialog(_logWindow);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     QsoFile qsoCompareFile = null;
                     String selectedFile = chooser.getSelectedFile().getName();
@@ -467,6 +468,23 @@ public class QsoActionMenu extends QsoMenu {
         );
         _statesCheckItem.setEnabled(false);
         add(_statesCheckItem);
+        
+         // create a grid update item
+        _gridUpdateItem = new JMenuItem("Update Grid Info", null);
+        _gridUpdateItem.setMnemonic(KeyEvent.VK_G);
+        _gridUpdateItem.setToolTipText("Update QTH grid entry");
+        _gridUpdateItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                // open the update grid panel
+                if (_logWindow.getContentPane() != null) {
+                    QsoUpdateGridFrame gridPane = new QsoUpdateGridFrame(_logWindow);
+                    gridPane.update();
+                }
+            }
+        });
+        _gridUpdateItem.setEnabled(false);
+        add(_gridUpdateItem);
     }
 
     int checkForDuplicates(boolean markDupes) {
@@ -766,12 +784,14 @@ public class QsoActionMenu extends QsoMenu {
             _columnEditItem.setEnabled(true);
             _compareRulesItem.setEnabled(true);
             _statesCheckItem.setEnabled(true);
+            _gridUpdateItem.setEnabled(true);
         } else {
             _fileCompareItem.setEnabled(false);
             _dupeCheckItem.setEnabled(false);
             _columnEditItem.setEnabled(false);
             _compareRulesItem.setEnabled(true);
             _statesCheckItem.setEnabled(true);
+            _gridUpdateItem.setEnabled(false);
         }
     }
 
@@ -801,6 +821,7 @@ public class QsoActionMenu extends QsoMenu {
     private JMenuItem _columnEditItem;
     private JMenuItem _compareRulesItem;
     private JMenuItem _statesCheckItem;
+    private JMenuItem _gridUpdateItem;
     private static LinkedHashMap<String, Integer> _rulesMap;
     private LinkedHashMap<String, Integer> _statesMap;
     private LinkedHashMap<String, JCheckBox> _checkBoxList;
