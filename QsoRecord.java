@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package qsologviewer;
 
 import java.io.BufferedWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -36,7 +36,6 @@ public class QsoRecord {
 
     public static QsoRecord create(String recStr) throws NumberFormatException {
         QsoRecord rec = null;
-
         if (recStr.split("<", 100).length > 3) {
             rec = new QsoRecord();
             rec.parse(recStr);
@@ -47,14 +46,27 @@ public class QsoRecord {
     QsoRecord parse(String recStr) throws NumberFormatException {
         QsoRecord qsoRec = null;
 
-        String[] tokens = recStr.split("<", 100);
-        if (tokens.length > 3) {
-            String[] names = new String[tokens.length];
-            String[] values = new String[tokens.length];
-            for (int n = 0; n < tokens.length; n++) {
-                if (tokens[n].length() > 3) {
-                    values[n] = tokens[n].replaceFirst(".*>", "");
-                    names[n] = tokens[n].replaceFirst(">.*", "");
+        // split into records on '<' boundaries
+        String[] toks = recStr.split("<", 100);
+        ArrayList<String> tokens = new ArrayList<>();
+        // don't use '<!--' as a token boundary
+        for (int i = 0; i < toks.length; i++) {
+            if (toks[i].indexOf("!--") == 0) {
+                toks[i] = " " + toks[i].replace('>', ' ');
+                String str1 = tokens.remove(tokens.size() - 1);
+                str1 += toks[i];
+                tokens.add(str1);
+            } else {
+                tokens.add(toks[i]);
+            }
+        }
+        if (tokens.size() > 3) {
+            String[] names = new String[tokens.size()];
+            String[] values = new String[tokens.size()];
+            for (int n = 0; n < tokens.size(); n++) {
+                if (tokens.get(n).length() > 5) {
+                    values[n] = tokens.get(n).replaceFirst(".*>", "");
+                    names[n] = tokens.get(n).replaceFirst(">.*", "");
                     if (names[n].compareToIgnoreCase("EOR") == 0) {
                         break;
                     }
@@ -79,12 +91,15 @@ public class QsoRecord {
                     if (len != value4test.length()) {
                         throw (new NumberFormatException("tag " + tag[0] + " length does not match value length:\n" + recStr));
                     }
-                    _fields.put(id, values[n]);
+                    put(id, values[n]);
                 }
             }
         }
-
         return qsoRec;
+    }
+    
+    public String put(String id, String value) {
+        return _fields.put(id, value);
     }
 
     public int getSize() {
@@ -143,17 +158,16 @@ public class QsoRecord {
     String getIndex() {
         return _recIndex;
     }
-    
-    
+
     boolean containsField(String key) {
         boolean ret = false;
-        
+
         String ucKey = key.toUpperCase();
         String lcKey = key.toLowerCase();
-        if(_fields.containsKey(ucKey)) {
+        if (_fields.containsKey(ucKey)) {
             ret = true;
         }
-        if(_fields.containsKey(lcKey)) {
+        if (_fields.containsKey(lcKey)) {
             ret = true;
         }
         return ret;
