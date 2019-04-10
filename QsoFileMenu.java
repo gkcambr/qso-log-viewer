@@ -78,9 +78,9 @@ public class QsoFileMenu extends QsoMenu {
                 } else {
                     chooser = new JFileChooser();
                 }
-                FileNameExtensionFilter filter = new FileNameExtensionFilter("AIDF images", "adi");
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("ADIF files", "adi");
                 chooser.setFileFilter(filter);
-                int returnVal = chooser.showOpenDialog(null);
+                int returnVal = chooser.showOpenDialog(_logWindow);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     QsoFile qsoFile = null;
                     if (chooser.getSelectedFile().getName().toLowerCase().endsWith(".adi")) {
@@ -197,7 +197,7 @@ public class QsoFileMenu extends QsoMenu {
                 }
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("AIDF images", "adi");
                 chooser.setFileFilter(filter);
-                int returnVal = chooser.showOpenDialog(null);
+                int returnVal = chooser.showOpenDialog(_logWindow);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     QsoFile qsoFile = null;
                     if (chooser.getSelectedFile().getName().toLowerCase().endsWith(".adi")) {
