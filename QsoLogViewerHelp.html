@@ -1,0 +1,350 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!--
+Copyright (C) 2019 keithc
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title></title>
+        <meta name="generator" content="LibreOffice 6.0.7.3 (Linux)"/>
+        <meta name="author" content="George Cambron"/>
+        <meta name="created" content="2018-07-03T00:00:00.011531042"/>
+        <meta name="changed" content="2019-04-08T16:28:17.433912638"/>
+        <style type="text/css">
+            @page { margin: 0.79in }
+            p { margin-bottom: 0.08in }
+            h1 { margin-bottom: 0.08in }
+            h1.western { font-family: "Arial", sans-serif; font-size: 16pt }
+            h1.cjk { font-family: "Microsoft YaHei"; font-size: 16pt }
+            h1.ctl { font-family: "Arial"; font-size: 16pt }
+            h2 { margin-bottom: 0.08in }
+            h2.western { font-family: "Arial", sans-serif; font-size: 14pt; font-style: italic }
+            h2.cjk { font-family: "Microsoft YaHei"; font-size: 14pt; font-style: italic }
+            h2.ctl { font-family: "Arial"; font-size: 14pt; font-style: italic }
+            a:link { so-language: zxx }
+        </style>
+    </head>
+    <body lang="en-US" dir="ltr">
+        <p align="center" style="margin-bottom: 0in">QsoLogViewer</p>
+        <p align="center" style="margin-bottom: 0in">Help File</p>
+        <p align="center" style="margin-bottom: 0in">Version 1.1.0</p>
+        <p style="margin-bottom: 0in"><br/>
+
+        </p>
+        <h1 class="western"><font size="4" style="font-size: 14pt">Introduction</font></h1>
+        <p style="margin-bottom: 0in">Ham radio operators use a number of
+            different databases to manage their contacts, or QSOs. Many are
+            web-hosted sites that are viewed by other hams and grant awards for
+            achieving milestones such as all states contacted. Among these
+            web-hosted sites three are quite popular, <a href="https://www.eqsl.cc/">eqsl.cc</a>,
+            <a href="https://www.qrz.com/index.html">qrz.com</a> and
+            <a href="https://lotw.arrl.org/lotwuser/qsos">lotw.arrl.org</a> .
+            Operators generally use a PC based logging program, such as Ham Radio
+            Deluxe (hrd) Logbook, N1MM Logger, Winlog32 or other programs to
+            record their QSOs as they complete their contacts. Periodically hams
+            export their recent QSOs to a standard file and upload it to one or
+            more web-hosted sites.</p>
+        <p style="margin-bottom: 0in">Over time the web-hosted sites and the
+            local logger(s) become inconsistent. Some of the reasons
+            inconsistencies occur are:</p>
+        <ul>
+            <li/>
+            <p style="margin-bottom: 0in">hams forget to upload all of
+                their QSOs</p>
+            <li/>
+            <p style="margin-bottom: 0in">QSOs are uploaded twice. These
+                duplicates should be caught by the logging site but they are not
+                always discovered.</p>
+            <li/>
+            <p style="margin-bottom: 0in">an operator has their clock
+                improperly set to UTC. When the contacted operator upload their QSO
+                log entry the two will not match, and a duplicate may be created.</p>
+        </ul>
+        <p style="margin-bottom: 0in">QsoLogViewer is an application for
+            aiding operators in finding duplicate QSOs and missing QSOs in these
+            different repositories. Once duplicates are identified operator can
+            use the edit features of the logbook to delete or correct those
+            records. QsoLogViewer can also prepare an update file for missing
+            QSOs so the operator can upload them into the correct logbook.</p>
+        <h1 class="western"><font size="4" style="font-size: 14pt">Important
+                Note</font></h1>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt"><u>QsoLogViewer
+                    is not an editor</u>. You cannot edit your logbook database directly
+                from the tables created by QsoLogViewer. Every logbook has different
+                fields and conventions for assigning values to fields and storing
+                them. Use QsoLogViewer to find duplicates and then correct them with
+                the logbook tools.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">QsoLogViewer
+                can create difference files, that is a file that contains QSOs that
+                exist in one logbook but are not found in another. That file can then
+                be uploaded into the incomplete logbook and thereby synchronize the
+                two logbooks. <u>Use this feature with care.</u> If you upload an
+                incorrect difference file or load it into the wrong logbook you run
+                the risk of creating a large number of duplicates.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">QsoLogViewer
+                does not operate directly on logbook databases, only on analyzes
+                files downloaded from those logbooks. So QsoLogViewe can't corrupt
+                the logbook database or induce errors in the logs unless you upload
+                an invalid file.</font></p>
+        <h1 class="western"><font size="4" style="font-size: 14pt">Using
+                QsoLogViewer</font></h1>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">The
+                following steps enable you to eliminate duplicate records and enter
+                missing records into you logbooks.</font></p>
+        <h2 class="western"><font size="4" style="font-size: 14pt">Step 1 -
+                Create a directory with downloaded AID files</font></h2>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">You
+                probably have multiple logbook databases, so create a new directory
+                (folder) that will contain files from all logbooks you want to
+                synchromize. I'll call that directory myLogs. Visit each web-hosted
+                logbook and export (download) a complete file of your QSOs in ADI
+                format. Make sure you download QSOs and not QSLs or you'll be missing
+                a lot of records. ADIF is a standard for Amateur Digital Information
+                Format. The other popular format, Cabrillo, is not supported by
+                QsoLogViewer at this time. Use the export feature of your PC based
+                logbook program to export a complete record of those databases to the
+                same directory. Name the files to indicate where they came from.
+                After downloading my directory had the following files:</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">qrz.adi
+                eqsl.adi lotw.adi hrd.adi</font></p>
+        <p style="margin-bottom: 0in"><br/>
+
+        </p>
+        <h2 class="western"><font size="4" style="font-size: 14pt">Step 2 -
+                Load and View an AID file</font></h2>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">Select
+                the first file you want to analyze. We'll use eqsl.adi in this
+                example. Load the file using the menu items: File-&gt;Open. A file
+                chooser dialog will let you select the file, eqsl.adi in our example.
+                Once loaded you should see a table similar to the one below:</font></p>
+        <p style="margin-bottom: 0in"><img src="images/FileLoad.png" name="graphics1" alt="see images in QsoLogViewerHelp.html" align="left" width="518" height="377">
+            <br clear="left"/>
+            <font size="3" style="font-size: 12pt">The
+                table lists QSO records in the order received in the downloaded file.
+                You can sort the records by clicking on the column headings. So to
+                reorder the records by call sign click on the 'CALL' heading.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">The
+                columns shown when first opening the file are set by default to the
+                ones shown above. You can modify the columns you'd like to see by
+                selecting the Action-&gt;Edit Columns men item. You'll see a dialog
+                similar to the one below.</font></p>
+        <p style="margin-bottom: 0in"><img src="images/EditColumns.png" name="graphics2" alt="see images in QsoLogViewerHelp.html" align="left" width="263" height="528">
+            <br clear="left"/>
+            <font size="3" style="font-size: 12pt">You
+                can hide a column by unchecking it, or show a column by checking it.
+                The underlying QSO records are unaffected. Only the table view is
+                affected.</font></p>
+        <h2 class="western"><font size="4" style="font-size: 14pt">Step 3 -
+                Find Duplicates</font></h2>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">To
+                find duplicates in the adif file select the Action-&gt;Find
+                Duplicates menu item. A dialog similar to the one below will appear.</font></p>
+        <p style="margin-bottom: 0in"><img src="images/DuplicatesFound.png" name="graphics3" alt="see images in QsoLogViewerHelp.html" align="left" width="363" height="119">
+            <br clear="left"/>
+            <font size="3" style="font-size: 12pt">Click
+                OK and you will be taken back to the table. However now duplicate
+                records are selected (highlighted). You can view only the duplicates
+                by selecting the menu item View-&gt;Show Selected Records. Then the
+                table will only show an updated list of selected records similar to
+                the following.</font></p>
+        <p style="margin-bottom: 0in"><img src="images/DuplicatesDisplayed.png" name="graphics4" alt="see images in QsoLogViewerHelp.html" align="left" width="522" height="380">
+            <br clear="left"/>
+            <font size="3" style="font-size: 12pt">In
+                this example I clicked on the CALL header in the table to sort them
+                by call sign. At this point you should log into your web-hosted or
+                local logbook and delete the duplicate records. You may want to
+                delete those records not acknowledged by the other operator, when
+                possible.</font></p>
+        <p style="margin-bottom: 0in; page-break-inside: avoid; page-break-before: auto; page-break-after: auto">
+            <font size="3" style="font-size: 12pt">Once you've corrected the
+                source logbook you can download a revised AIDF file if the changes
+                are extensive. That will prepare you for the next step, identifying
+                missing records. Note that when you are only viewing selected records
+                the QsoLogViewer title bar will include the term '- Updated List -'.
+                This tells you that you are looking at selected records. To return to
+                a view of the entire file use the <br/>
+                View-&gt;Show All Rows menu
+                item.</font></p>
+        <h2 class="western"><font size="4" style="font-size: 14pt">Step 4 -
+                Find and Upload Missing Records</font></h2>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">To
+                find duplicates in an adif file begin by opening the file you
+                consider most complete with the</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">File-&gt;Open
+                menu item. Then select the Action-&gt;Compare Files menu item. The
+                file chooser menu will appear asking which file you want to compare
+                to the open ADIF file. You may get a warning about duplicate records,
+                but you can hit OK to continue. You should then see a dialog similar
+                to the one below.</font></p>
+        <p style="margin-bottom: 0in"><img src="images/MissingRecordsFound.png" name="graphics5" alt="see images in QsoLogViewerHelp.html" align="left" width="469" height="198">
+            <br clear="left"/>
+            <br/>
+
+        </p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">In
+                this example eight missing records were found. The eight records are
+                in the open file, qrz.adi, but not in the compare file, eqsl.adi.
+                After you hit the OK button you'll be returned to the main table,
+                showing qrz.adi in this example. At that point you will probably want
+                to see only selected (highlighted) records. To see them use the
+                View-&gt;Show Selected Rows menu item. You should see something like
+                the following.</font></p>
+        <p style="margin-bottom: 0in"><img src="images/MissingRecordsList.png" name="graphics6" alt="see images in QsoLogViewerHelp.html" align="left" width="519" height="380">
+            <br clear="left"/>
+            <font size="3" style="font-size: 12pt">Look
+                these records over and identify any you consider invalid and edit
+                those out by selecting them (Cntrl+left click) and then using the
+                menu item Edit-&gt;Delete. This action only deletes them from the
+                Update List table; it does not affect the AIDF file or any logbook.
+                You can now create an update file by selecting the File-&gt;Save menu
+                item. I use the naming convention eqsl_update.adi so I am careful to
+                only upload updates, not entire logbook AIDF files.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">Once
+                you have eliminated duplicates and uploaded missing files your
+                logbooks should be synchronized.</font></p>
+        <h1 class="western"><font size="4" style="font-size: 14pt">Additional
+                Menu Items</font></h1>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">In
+                addition to the menu items already covered, there are two that may be
+                helpful.</font></p>
+        <h2 class="western">Header Menu Item</h2>
+        <p style="margin-bottom: 0in">After opening a file use the View-&gt;File
+            Header menu item to display the opened AIDF file's meta data. While
+            this can vary, it generally displays which logbook created the file,
+            when it was created and which version of the AIDF standard it
+            complies with. It will look something like the following.</p>
+        <p style="margin-bottom: 0in"><img src="images/Header.png" name="graphics7" alt="see images in QsoLogViewerHelp.html" align="left" width="334" height="180">
+            <br clear="left"/>
+            <br/>
+        </p>
+        <h2 class="western">Comparison Rules Menu Item</h2>
+        <p style="margin-bottom: 0in">Qso log records are compared when
+            searching for duplicates and when two logbook AIDF files are
+            compared. By default QsoLogViewer looks for matches using Call Sign,
+            Band, Qso Date and Qso Time On (the UTC time the Qso started). In
+            using Qso Time On two times are considered identical if they are
+            within a default of 5 minutes of each other. Users can change these
+            criteria using the Action-&gt;Show Rules menu item. When selecting
+            this menu item you will see the dialog below.</p>
+        <p style="margin-bottom: 0in"><img src="images/ComparisonRules.png" name="graphics8" alt="see images in QsoLogViewerHelp.html" align="left" width="267" height="447">
+            <br clear="left"/>
+            <br/>
+
+        </p>
+        <p style="margin-bottom: 0in">When using these fields QsoLogViewer
+            ignores case, so the call sign KC1ATT matches with the call sign
+            kc1att. 
+        </p>
+        <h2 class="western">Check All States Menu Item</h2>
+        <p style="margin-bottom: 0in">Users can check their progress toward
+            logging QSOs for all fifty US states by selecting this menu item,
+            after loading an ADIF log file. Both QRZ.com and LoTW include the
+            home state, QTH, of operators in the schema for their databases.
+            eqsl.cc does not include this information, so this menu item will not
+            work with log files from that site. When selecting this item a dialog
+            box, similar to the one below, will display the results.</p>
+        <p style="margin-bottom: 0in"><img src="images/AllStatesCheck.png" name="graphics8" alt="see images in QsoLogViewerHelp.html" align="left" width="250" height="120">
+            <br clear="left"/>
+            <br/>
+        </p>
+        <h2 class="western" style="page-break-before: always">Update Grid
+            Info</h2>
+        <p>Log files often having missing or incomplete gridsquare
+            information. Gridsquare information is used to calculate the location
+            of the other operator. Some logging programs retrieve gridsquare
+            information in real time, as the call sign of the other operator is
+            logged, but to use this feature you need to have a source. Two web
+            sites that offer this service are qrz.com and hamqth.com . To use all
+            the features of qrz.com you must be registered as an XML subscriber;
+            currently that costs about $30 per year. The other site, hamqth.com
+            is a free site, but I recommend users make a donation to help cover
+            the cost of maintaining the site. To open the dialog below select
+            'Upgrade Grid Info' from the Action menu.</p>
+        <p><img src="images/GridInfo.png" name="Image10" align="left" width="523" height="300">
+            <br clear="left"/>
+        </p>
+        <p><font size="3" style="font-size: 12pt">The dialog displays:</font></p>
+        <p><font size="3" style="font-size: 12pt">- the file you have opened
+                for upgrading,</font></p>
+        <p><font size="3" style="font-size: 12pt">- the number of records in
+                the file with grid information</font></p>
+        <p><font size="3" style="font-size: 12pt">- the number of records
+                without grid information</font></p>
+        <p><font size="3" style="font-size: 12pt">To use the feature you must
+                be a registered member of either hamqth.com or qrz.com . As mentioned
+                earlier, there is no cost to register with hamqth.com . Registered
+                users can then enter their user ID, generally your call sign, and
+                password to the site. Check the 'upgrade to six chars' if you want
+                to replace 4 character gridsquare information with 6 character
+                gridsquare information. Then select the 'Update records' button. You
+                may need to wait a few seconds for the session to begin but then
+                records should be upgraded at a rate of at least one per second.
+                QsoLogViewer will go through every entry and query the grid update
+                site for relevant grid information. As the session progresses the
+                'No. recs updated' will show how many queries resulted in valid
+                gridsquare information.</font></p>
+        <p><font size="3" style="font-size: 12pt">A pop up dialog will notify
+                you when the update is complete. You then need to close the Update
+                Grid Information dialog and then use the 'File-&gt;Save' menu item to
+                save the updated file under a new name. </font>
+        </p>
+        <p><font size="3" style="font-size: 12pt">If QsoLogViewer fails to
+                establish a session with the update site, you will see a dialog pop
+                up giving the reason.</font></p>
+        <h1 class="western"><font size="4" style="font-size: 14pt">GNU Public
+                License</font></h1>
+        <p><font size="3" style="font-size: 12pt">QsoLogViewer and it's use
+                are distributed under the terms of the GNU General Public License,
+                summarized below.</font></p>
+        <p><br/>
+            <br/>
+
+        </p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">/*</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                Copyright (C) 2018 G. Keith Cambron</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                This program is free software: you can redistribute it and/or modify</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                it under the terms of the GNU General Public License as published by</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                the Free Software Foundation, either version 3 of the License, or</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                (at your option) any later version.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                This program is distributed in the hope that it will be useful,</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                but WITHOUT ANY WARRANTY; without even the implied warranty of</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                GNU General Public License for more details.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                You should have received a copy of the GNU General Public License</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*
+                along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;.</font></p>
+        <p style="margin-bottom: 0in"><font size="3" style="font-size: 12pt">*/</font></p>
+        <h1 class="western"><font size="4" style="font-size: 14pt">Comments
+                and Questions</font></h1>
+        <p><font size="3" style="font-size: 12pt">Comments, bugs and
+                questions can be posted on github.com or sent to the author, Keith
+                Cambron at the email address <a href="mailto:gkcambr@yahoo.com">gkcambr@yahoo.com</a>
+                .</font></p>
+    </body>
+</html>
