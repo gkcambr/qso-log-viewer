@@ -26,6 +26,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -70,18 +71,36 @@ public class QsoUpdateGridFrame extends JFrame {
     int[] getGridCount(Stack<QsoRecord> records) {
         int noGridRecs = 0;
         int noMissingRecs = 0;
+        int no4charRecs = 0;
         Iterator<QsoRecord> it = records.iterator();
         while (it.hasNext()) {
             QsoRecord rec = it.next();
-            if (rec.containsField("GRIDSQUARE")) {
-                noGridRecs += 1;
+            if (rec.containsField("GRIDSQUARE")
+                    && (rec.getValue("GRIDSQUARE") != null)) {
+                String grid = rec.getValue("GRIDSQUARE").trim();
+                // check for 4 and 6 char gridsquare
+                if (grid.length() < 4) {
+                    noMissingRecs += 1;
+                    _missingRecs.add(rec);
+                } else if (grid.length() == 4) {
+                    no4charRecs += 1;
+                    _missingRecs.add(rec);
+                } else if (grid.length() == 6) {
+                    noGridRecs += 1;
+                }
+                else {
+                    // invalid gridsquare
+                    noMissingRecs += 1;
+                    rec.remove("GRIDSQUARE");
+                    _missingRecs.add(rec);
+                }
             } else {
                 noMissingRecs += 1;
                 _missingRecs.add(rec);
             }
         }
 
-        int[] ret = {noGridRecs, noMissingRecs};
+        int[] ret = {noGridRecs, noMissingRecs, no4charRecs};
         return ret;
     }
 
@@ -117,6 +136,10 @@ public class QsoUpdateGridFrame extends JFrame {
         JTextField noGridMissingText = new JTextField("number of records without grid info: " + gridCnt[1]);
         noGridMissingText.setEditable(false);
         noGridMissingText.setBorder(new EmptyBorder(0, 0, 0, 0));
+        noGridRecText.setBorder(new EmptyBorder(0, 0, 0, 0));
+        JTextField no4charText = new JTextField("number of records 4 char grid info: " + gridCnt[2]);
+        no4charText.setEditable(false);
+        no4charText.setBorder(new EmptyBorder(0, 0, 0, 0));
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = GridBagConstraints.REMAINDER; // end row
         c.weightx = 1.0;
@@ -125,9 +148,11 @@ public class QsoUpdateGridFrame extends JFrame {
         this.add(noGridRecText);
         _gridLayout.setConstraints(noGridMissingText, c);
         this.add(noGridMissingText);
+        _gridLayout.setConstraints(no4charText, c);
+        this.add(no4charText);
 
         // update site fields
-        JTextField siteNotice = new JTextField("You must registered for updates at one of the following:");
+        JTextField siteNotice = new JTextField("You must be registered for updates at one of the following:");
         siteNotice.setEditable(false);
         siteNotice.setBorder(new EmptyBorder(0, 0, 0, 0));
         c.fill = GridBagConstraints.BOTH;
@@ -168,6 +193,38 @@ public class QsoUpdateGridFrame extends JFrame {
         c.insets = new Insets(0, 40, 5, 10);
         _gridLayout.setConstraints(updateBox, c);
         this.add(updateBox);
+
+        // update 4 char gridsquare data with 6 char gridsquare info
+        JTextField char4to6chars = new JTextField("Upgrade 4 char grids:");
+        char4to6chars.setColumns(20);
+        char4to6chars.setHorizontalAlignment(JTextField.RIGHT);
+        char4to6chars.setEditable(false);
+        char4to6chars.setBorder(new EmptyBorder(0, 0, 0, 0));
+        c.fill = GridBagConstraints.BOTH;
+        c.gridwidth = GridBagConstraints.RELATIVE;
+        c.weightx = 1.0;
+        _gridLayout.setConstraints(char4to6chars, c);
+        c.insets = new Insets(0, 40, 5, 10);
+        this.add(char4to6chars);
+
+        _grids2sixBox = new JCheckBox("upgrade to six chars");
+        _grids2sixBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    _grids2six = true;
+                } else {
+                    _grids2six = false;
+                }
+            }
+        });
+        _grids2sixBox.setBorder(new EmptyBorder(0, 0, 0, 0));
+        c.fill = GridBagConstraints.BOTH;
+        c.gridwidth = GridBagConstraints.REMAINDER; // end row
+        c.weightx = 1.0;
+        c.insets = new Insets(0, 40, 5, 10);
+        _gridLayout.setConstraints(_grids2sixBox, c);
+        this.add(_grids2sixBox);
 
         // user id and password
         JTextField userIdHdr = new JTextField("user ID:");
@@ -251,13 +308,14 @@ public class QsoUpdateGridFrame extends JFrame {
 
         _showPasswd = new JCheckBox("Show Password");
         _showPasswd.addItemListener(new ItemListener() {
+            @Override
             public void itemStateChanged(ItemEvent e) {
                 if (e.getStateChange() == ItemEvent.SELECTED) {
                     _passwd.setEchoChar((char) 0);
                 } else {
                     _passwd.setEchoChar('*');
                 }
-            }          
+            }
         });
         _showPasswd.setBorder(new EmptyBorder(0, 0, 0, 0));
         c.fill = GridBagConstraints.BOTH;
@@ -317,6 +375,9 @@ public class QsoUpdateGridFrame extends JFrame {
         }
         JOptionPane.showInternalMessageDialog(_panel, msg,
                 "information", JOptionPane.INFORMATION_MESSAGE);
+        
+        // close the winow
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
     void cancelSession() {
@@ -356,10 +417,12 @@ public class QsoUpdateGridFrame extends JFrame {
         if (_siteId == SITE_QRZ) {
             if (_sessionKey == null || _sessionKey.length() != 32) {
                 ret = false;
+                return ret;
             }
         } else {
             if (_sessionKey == null || _sessionKey.length() != 40) {
                 ret = false;
+                return ret;
             }
         }
 
@@ -388,6 +451,8 @@ public class QsoUpdateGridFrame extends JFrame {
     JTextField _userId;
     JPasswordField _passwd;
     JCheckBox _showPasswd;
+    JCheckBox _grids2sixBox;
+    boolean _grids2six = false;
     JTextField _updateRecCnt;
     ButtonGroup _updateGrp;
     JButton _loginBtn;
@@ -483,7 +548,8 @@ public class QsoUpdateGridFrame extends JFrame {
                             }
                             int indx = inMsg.indexOf("<" + keyDelim + ">");
                             if (indx > 0) {
-                                inMsg = inMsg.substring(indx + ("<" + keyDelim + ">").length());
+                                String tmpMsg = inMsg.substring(indx + ("<" + keyDelim + ">").length());
+                                inMsg = tmpMsg;
                                 indx = inMsg.indexOf("</" + keyDelim + ">");
                                 if (indx > 0) {
                                     setSessionKey(inMsg.substring(0, indx));
@@ -531,7 +597,29 @@ public class QsoUpdateGridFrame extends JFrame {
             Iterator<QsoRecord> it = _missingRecs.iterator();
             while (it.hasNext() && _abort == false) {
                 QsoRecord rec = it.next();
+
+                // check for an existing 6 char grid record
+                String oldGrid = rec.getValue("GRIDSQUARE");
+                if (oldGrid != null) {
+                    String tmpStr = oldGrid.trim();
+                    oldGrid = tmpStr;
+                    if (oldGrid.length() == 6) {
+                        // six char grid - move on
+                        continue;
+                    }
+                    if (!_grids2six && oldGrid.length() == 4) {
+                        // four char grid - move on
+                        continue;
+                    }
+                }
+
+                // update the grid info
                 String callSign = rec.getValue("call");
+                if (callSign == null || callSign.length() < 3) {
+                    continue;
+                }
+                String tmpStr = callSign.trim();
+                callSign = tmpStr;
                 String urlStr;
                 try {
                     if (getSiteId() == SITE_QRZ) {
@@ -541,7 +629,7 @@ public class QsoUpdateGridFrame extends JFrame {
                     } else {
                         urlStr = "https://www.hamqth.com/xml.php?id=" + getSessionKey() + "&callsign=" + callSign + "&prg=QsoLogViewer";
                         url = new URL(urlStr);
-                        connection = (HttpsURLConnection) url.openConnection();
+                        connection = (HttpURLConnection) url.openConnection();
                     }
                 } catch (MalformedURLException ex) {
                     JOptionPane.showMessageDialog(_panel,
@@ -575,16 +663,25 @@ public class QsoUpdateGridFrame extends JFrame {
                                     inMsg = inMsg.substring(indx + "<grid>".length());
                                     indx = inMsg.indexOf("</grid>");
                                     if (indx > 0) {
-                                        String grid = inMsg.substring(0, indx);
+                                        tmpStr = inMsg.substring(0, indx);
+                                        String grid = tmpStr.trim();
                                         if (grid.length() >= 4 && grid.length() <= 8) {
                                             // adif format uses gridsquare, not grid
-                                            rec.put("gridsquare", grid);
+                                            rec.put("GRIDSQUARE", grid);
                                             noUpdatedRecs += 1;
                                         }
                                     }
                                 }
                             }
                         }
+                    } else {
+                        // did not receive 'OK' response
+                        JOptionPane.showMessageDialog(_panel,
+                                "invalid response from " + getSiteName() + " .\nresp: " + resp,
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        cancelSession();
+                        return noUpdatedRecs;
                     }
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(_panel,
