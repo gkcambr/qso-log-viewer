@@ -10,7 +10,7 @@ java -jar QsoLogViewer.jar
 You can create a shortcut for your desktop:
 - copy QsoLogViewer.jar to a working directory, such as C:/apps/QsoLog
 - copy the file QsoLogViewer_48.ico from the github master/images directory to your working directory
-- create a desktop shortcut with a target of 'java -jar YOUR_WORK_DIR/QsoLogViewer.jar and add the icon file QsoLogViewer_48.ico to the shortcut.
+- create a desktop shortcut with a target of 'javaw -jar YOUR_WORK_DIR/QsoLogViewer.jar and add the icon file QsoLogViewer_48.ico to the shortcut.
 
 Description:
 Ham radio operators use a number of different databases to manage their contacts, or QSOs. Many are web-hosted sites that are viewed by other hams and grant awards for achieving milestones such as all states contacted. Among these web-hosted sites three are quite popular, eqsl.cc, qrz.com and lotw.arrl.org . Operators generally use a PC based logging program, such as Ham Radio Deluxe (hrd) Logbook, N1MM Logger, Winlog32 or other programs to record their QSOs as they complete their contacts. Periodically hams export their recent QSOs to a standard file and upload it to one or more web-hosted sites.
