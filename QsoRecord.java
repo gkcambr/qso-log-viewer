@@ -17,6 +17,7 @@
 package qsologviewer;
 
 import java.io.BufferedWriter;
+import static java.lang.Math.abs;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -88,8 +89,12 @@ public class QsoRecord {
                             break;
                         }
                     }
-                    if (len != value4test.length()) {
-                        throw (new NumberFormatException("tag " + tag[0] + " length does not match value length:\n" + recStr));
+                    // test against a 5% error
+                    if (len != 0) {
+                        int lenErr = abs(((len - value4test.length()) * 100) / len);
+                        if (lenErr > 5) {
+                            throw (new NumberFormatException("tag " + tag[0] + " length does not match value length:\n" + recStr));
+                        }
                     }
                     put(id, values[n]);
                 }
@@ -97,9 +102,18 @@ public class QsoRecord {
         }
         return qsoRec;
     }
-    
+
     public String put(String id, String value) {
-        return _fields.put(id, value);
+        if (id == null || value == null) {
+            return null;
+        }
+        return _fields.put(id.toLowerCase(), value);
+    }
+
+    public void remove(String id) {
+        if (id != null) {
+            _fields.remove(id.toLowerCase());
+        }
     }
 
     public int getSize() {

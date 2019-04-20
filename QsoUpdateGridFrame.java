@@ -27,14 +27,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
@@ -60,12 +70,9 @@ public class QsoUpdateGridFrame extends JFrame {
         _gridUpdateFrame = this;
         _gridUpdateFrame.setTitle(TITLE);
         _gridLayout = new GridBagLayout();
-        _panel = (JPanel) this.getContentPane();
         _logWindow = logWindow;
         _qsoFile = ((QsoPane) _logWindow.getContentPane())._qsoFile;
         _missingRecs = new Stack<>();
-        ArrayList<Image> imageList = _logWindow.getImages();
-        setIconImages(imageList);
     }
 
     int[] getGridCount(Stack<QsoRecord> records) {
@@ -87,8 +94,7 @@ public class QsoUpdateGridFrame extends JFrame {
                     _missingRecs.add(rec);
                 } else if (grid.length() == 6) {
                     noGridRecs += 1;
-                }
-                else {
+                } else {
                     // invalid gridsquare
                     noMissingRecs += 1;
                     rec.remove("GRIDSQUARE");
@@ -108,6 +114,9 @@ public class QsoUpdateGridFrame extends JFrame {
         // construct the dialog
         this.setSize(480, 280);
         this.setResizable(false);
+        ArrayList<Image> imageList = _logWindow.getImages();
+        setIconImages(imageList);
+        _panel = (JPanel) this.getContentPane();
         Font font = _panel.getFont();
         Font newFont = font.deriveFont(14);
         _panel.setFont(newFont);
@@ -211,7 +220,7 @@ public class QsoUpdateGridFrame extends JFrame {
         _grids2sixBox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
+                if (_grids2sixBox.isSelected()) {
                     _grids2six = true;
                 } else {
                     _grids2six = false;
@@ -224,6 +233,7 @@ public class QsoUpdateGridFrame extends JFrame {
         c.weightx = 1.0;
         c.insets = new Insets(0, 40, 5, 10);
         _gridLayout.setConstraints(_grids2sixBox, c);
+        _grids2sixBox.setSelected(true);
         this.add(_grids2sixBox);
 
         // user id and password
@@ -375,13 +385,15 @@ public class QsoUpdateGridFrame extends JFrame {
         }
         JOptionPane.showInternalMessageDialog(_panel, msg,
                 "information", JOptionPane.INFORMATION_MESSAGE);
-        
+
         // close the winow
         this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
     void cancelSession() {
         _sessionCanceled = true;
+        // close the winow
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
     void setSiteId(String clue) {
@@ -443,7 +455,7 @@ public class QsoUpdateGridFrame extends JFrame {
     // Properties
     QsoUpdateGridFrame _gridUpdateFrame;
     static final String TITLE = "Update Grid Information";
-    final JPanel _panel;
+    JPanel _panel;
     final GridBagLayout _gridLayout;
     final QsoLogWindow _logWindow;
     final QsoFile _qsoFile;
@@ -666,6 +678,40 @@ public class QsoUpdateGridFrame extends JFrame {
                                         tmpStr = inMsg.substring(0, indx);
                                         String grid = tmpStr.trim();
                                         if (grid.length() >= 4 && grid.length() <= 8) {
+                                            // do not upgrade the old grid if it is
+                                            // completely different than the new one
+                                            if (oldGrid != null && oldGrid.length() == 4) {
+                                                String tmpOld = oldGrid.toUpperCase();
+                                                String tmpNew = grid.toUpperCase();
+                                                if (!tmpNew.contains(tmpOld)) {
+                                                    // new is very different than old
+                                                    try {
+                                                        // open the writer
+                                                        if (_wrtr == null) {
+                                                            String dir = QsoInitFile.getInstance().getLastFileDir();
+                                                            String errFile = qsologviewer.QsoAidFile._errFileName;
+                                                            _wrtr = new BufferedWriter(
+                                                                new OutputStreamWriter(
+                                                                    new FileOutputStream(
+                                                                        dir + File.separator + errFile, true),
+                                                                        "ISO-8859-1"));
+                                                        }
+
+                                                        // write the error
+                                                        if (_wrtr != null) {
+                                                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                                            String timeStamp = simpleDateFormat.format(new Date());
+                                                            String errMsg = timeStamp + ": For call sign: " + callSign + " logged grid: " + oldGrid + " differs from "
+                                                                    + _siteName + " grid: " + grid + ". Record unchanged - remote operation?.\n";
+                                                            _wrtr.append(errMsg);
+                                                        }
+                                                        _wrtr.flush();
+                                                    } catch (IOException ex1) {
+                                                        Logger.getLogger(QsoRecord.class.getName()).log(Level.SEVERE, null, ex1);
+                                                    }
+                                                    continue;
+                                                }
+                                            }
                                             // adif format uses gridsquare, not grid
                                             rec.put("GRIDSQUARE", grid);
                                             noUpdatedRecs += 1;
@@ -693,6 +739,13 @@ public class QsoUpdateGridFrame extends JFrame {
                 }
                 updateRecordCount(noUpdatedRecs);
             }
+            if(_wrtr != null) {
+                try {
+                    _wrtr.append("\n");
+                } catch (IOException ex) {
+                    Logger.getLogger(QsoUpdateGridFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             return noUpdatedRecs;
         }
 
@@ -702,5 +755,6 @@ public class QsoUpdateGridFrame extends JFrame {
 
         // Properties
         boolean _abort = false;
+        BufferedWriter _wrtr = null;
     }
 }

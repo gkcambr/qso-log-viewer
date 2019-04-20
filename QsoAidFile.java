@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -44,7 +46,6 @@ public class QsoAidFile extends QsoFile {
         String line;
         boolean eoh = false;
         BufferedWriter wrtr = null;
-        String errFileName;
         int ret = 0;
 
         BufferedReader rdr;
@@ -100,9 +101,8 @@ public class QsoAidFile extends QsoFile {
                         }
                     }
                     if (wrtr == null) {
-                        errFileName = _fileName.toLowerCase().replace("adi", "err");
                         JOptionPane.showOptionDialog(null, "Error found in record " + _fileName + ".\n"
-                                + "check '" + errFileName + "' for details\n", "Warning",
+                                + "check '" + _errFileName + "' for details\n", "Warning",
                                 JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                                 null, null, null);
                         try {
@@ -110,7 +110,7 @@ public class QsoAidFile extends QsoFile {
                                     new OutputStreamWriter(
                                             new FileOutputStream(
                                                     QsoInitFile.getInstance().getLastFileDir()
-                                                    + File.separator + errFileName),
+                                                    + File.separator + _errFileName, true),
                                             "ISO-8859-1"));
 
                         } catch (UnsupportedEncodingException
@@ -120,11 +120,13 @@ public class QsoAidFile extends QsoFile {
                     }
                     try {
                         if (wrtr != null) {
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            String timeStamp = simpleDateFormat.format(new Date());
                             if (errMsg[0] != null) {
-                                wrtr.write(errMsg[0] + "\n");
+                                wrtr.append(timeStamp + ": " + errMsg[0] + "\n");
                             }
                             if (errMsg.length > 0) {
-                                wrtr.write(listStr + "\n\n");
+                                wrtr.append(listStr + "\n\n");
                             }
                             wrtr.flush();
                         }
@@ -144,11 +146,11 @@ public class QsoAidFile extends QsoFile {
         }
 
         rdr.close();
-        if(wrtr != null) {
+        if (wrtr != null) {
             wrtr.close();
         }
         return ret;
     }
 
-// Properties
+    // Properties
 }
