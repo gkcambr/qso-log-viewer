@@ -52,32 +52,10 @@ public class QsoTable extends JTable {
         col.setMaxWidth(COL_DEFAULT_MAX_WIDTH);
         col.setPreferredWidth(COL_DEFAULT_PREFER_WIDTH);
     }
-    /*
-    void showSelectedRows() {
-        int[] selrows = getSelectedRows();
-        ArrayList<Integer> rowlist;
-        rowlist = new ArrayList<>(selrows.length);
-        for(int i = 0; i < selrows.length; i++) {
-            rowlist.add(selrows[i]);
-        }
-        
-        for( int n = 0; n < getRowCount(); n++) {
-            if(!rowlist.contains(n)) {
-                setRowHeight(n, 1);
-            }
-        }
-    }
     
-    void showAllRows() {
-        int height = getRowHeight();
-        
-        for( int n = 1; n < getRowCount(); n++) {
-                setRowHeight(n, height);
-        }
-    }
-    */
     // Properties
     private static final int COL_DEFAULT_MIN_WIDTH = 15;
     private static final int COL_DEFAULT_MAX_WIDTH = 200000;
-    private static final int COL_DEFAULT_PREFER_WIDTH = 75;    
+    private static final int COL_DEFAULT_PREFER_WIDTH = 75;   
+    private static final long serialVersionUID = 100L;
 }

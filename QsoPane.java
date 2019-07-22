@@ -157,4 +157,5 @@ public class QsoPane extends JPanel {
     QsoTable _currentTable;
     QsoTable _selectedTable;
     QsoTable _openTable;
+    private static final long serialVersionUID = 100L;
 }

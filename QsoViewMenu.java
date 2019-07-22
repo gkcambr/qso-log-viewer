@@ -125,4 +125,5 @@ public class QsoViewMenu extends QsoMenu {
     JMenuItem _headerItem;
     JMenuItem _showSelectedItem;
     JMenuItem _showAllRowsItem;
+    private static final long serialVersionUID = 100L;
 }

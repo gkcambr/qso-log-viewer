@@ -340,4 +340,5 @@ public class QsoFileMenu extends QsoMenu {
     JMenuItem _fileSaveItem;
     final String[] DEFAULT_COLUMNS = {"BAND", "QSO_DATE", "TIME_ON",
         "MODE", "CALL"};
+    private static final long serialVersionUID = 100L;
 }

@@ -17,29 +17,14 @@
 package qsologviewer;
 
 import java.awt.Desktop;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.text.Document;
-import javax.swing.text.html.HTMLEditorKit;
 
 /**
  *
@@ -102,4 +87,5 @@ public class QsoHelpMenu extends QsoMenu {
     // Properties
     JMenuItem _helpFileMenu;
     JMenuItem _aboutMenu;
+    private static final long serialVersionUID = 100L;
 }

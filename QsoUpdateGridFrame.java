@@ -29,12 +29,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -64,6 +62,39 @@ import javax.swing.border.EmptyBorder;
  * @author keithc
  */
 public class QsoUpdateGridFrame extends JFrame {
+
+    class MyAbstractAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (_session == null) {
+
+                // update the siteID (qrz or hamqth)                    
+                String site = _updateGrp.getSelection().getActionCommand();
+                setSiteId(site);
+
+                // start the session
+                _session = new XMLsession();
+                _session.start();
+                _loginBtn.setEnabled(false);
+                _loginBtn.setEnabled(true);
+                _loginBtn.setText("Cancel");
+            } else {
+                // stop the session
+                _session.abort();
+                try {
+                    _session.join(1000);
+                } catch (InterruptedException ex) {
+                    // do nothing
+                }
+                _session = null;
+                cancelSession();
+            }
+        }
+
+        /* properties */
+        static final long serialVersionUID = 100L;
+    };
 
     QsoUpdateGridFrame(QsoLogWindow logWindow) {
         super();
@@ -217,16 +248,6 @@ public class QsoUpdateGridFrame extends JFrame {
         this.add(char4to6chars);
 
         _grids2sixBox = new JCheckBox("upgrade to six chars");
-        _grids2sixBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (_grids2sixBox.isSelected()) {
-                    _grids2six = true;
-                } else {
-                    _grids2six = false;
-                }
-            }
-        });
         _grids2sixBox.setBorder(new EmptyBorder(0, 0, 0, 0));
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = GridBagConstraints.REMAINDER; // end row
@@ -280,34 +301,8 @@ public class QsoUpdateGridFrame extends JFrame {
         this.add(_passwd);
 
         _loginBtn = new JButton("Update records");
-        _loginBtn.addActionListener(new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (_session == null) {
-
-                    // update the siteID (qrz or hamqth)                    
-                    String site = _updateGrp.getSelection().getActionCommand();
-                    setSiteId(site);
-
-                    // start the session
-                    _session = new XMLsession();
-                    _session.start();
-                    _loginBtn.setEnabled(false);
-                    _loginBtn.setEnabled(true);
-                    _loginBtn.setText("Cancel");
-                } else {
-                    // stop the session
-                    _session.abort();
-                    try {
-                        _session.join(1000);
-                    } catch (InterruptedException ex) {
-                        // do nothing
-                    }
-                    _session = null;
-                    cancelSession();
-                }
-            }
-        });
+        MyAbstractAction abs = new MyAbstractAction();
+        _loginBtn.addActionListener(abs);
         _loginBtn.setSize(120, 40);
         c.fill = GridBagConstraints.BOTH;
         c.gridwidth = GridBagConstraints.RELATIVE; // end row
@@ -464,7 +459,6 @@ public class QsoUpdateGridFrame extends JFrame {
     JPasswordField _passwd;
     JCheckBox _showPasswd;
     JCheckBox _grids2sixBox;
-    boolean _grids2six = false;
     JTextField _updateRecCnt;
     ButtonGroup _updateGrp;
     JButton _loginBtn;
@@ -495,9 +489,10 @@ public class QsoUpdateGridFrame extends JFrame {
         HttpURLConnection openSession() {
             HttpURLConnection connection = null;
             String userId = _userId.getText();
-            String passwd = _passwd.getText();
+            char[] pwd = _passwd.getPassword();
+            String passwd = new String(pwd);
             if (userId == null || userId.length() < 2
-                    || passwd == null || passwd.length() < 2) {
+                    || passwd.length() < 2) {
                 JOptionPane.showMessageDialog(_panel,
                         "user id or password was not entered.",
                         "Error",
@@ -619,7 +614,7 @@ public class QsoUpdateGridFrame extends JFrame {
                         // six char grid - move on
                         continue;
                     }
-                    if (!_grids2six && oldGrid.length() == 4) {
+                    if (!_grids2sixBox.isSelected() && oldGrid.length() == 4) {
                         // four char grid - move on
                         continue;
                     }
@@ -691,10 +686,10 @@ public class QsoUpdateGridFrame extends JFrame {
                                                             String dir = QsoInitFile.getInstance().getLastFileDir();
                                                             String errFile = qsologviewer.QsoAidFile._errFileName;
                                                             _wrtr = new BufferedWriter(
-                                                                new OutputStreamWriter(
-                                                                    new FileOutputStream(
-                                                                        dir + File.separator + errFile, true),
-                                                                        "ISO-8859-1"));
+                                                                    new OutputStreamWriter(
+                                                                            new FileOutputStream(
+                                                                                    dir + File.separator + errFile, true),
+                                                                            "ISO-8859-1"));
                                                         }
 
                                                         // write the error
@@ -739,7 +734,7 @@ public class QsoUpdateGridFrame extends JFrame {
                 }
                 updateRecordCount(noUpdatedRecs);
             }
-            if(_wrtr != null) {
+            if (_wrtr != null) {
                 try {
                     _wrtr.append("\n");
                 } catch (IOException ex) {
@@ -756,5 +751,9 @@ public class QsoUpdateGridFrame extends JFrame {
         // Properties
         boolean _abort = false;
         BufferedWriter _wrtr = null;
+        static final long serialVersionUID = 100L;
     }
+
+    // Properties
+    static final long serialVersionUID = 100L;
 }

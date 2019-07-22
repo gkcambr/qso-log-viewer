@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JMenuItem;
 import javax.swing.RowSorter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /**
  *
@@ -51,7 +52,7 @@ public class QsoEditMenu extends QsoMenu {
                 if (tbl != null) {
                     int[] row = tbl.getSelectedRows();
                     for (int i = row.length - 1; i >= 0; i--) {
-                        RowSorter rs = tbl.getRowSorter();
+                        RowSorter<? extends TableModel> rs = tbl.getRowSorter();
                         int tmIndex = rs.convertRowIndexToModel(row[i]);
                         ((DefaultTableModel) tbl.getModel()).removeRow(tmIndex);
                     }
@@ -80,4 +81,5 @@ public class QsoEditMenu extends QsoMenu {
 
     // Properties
     JMenuItem _deleteItem;
+    private static final long serialVersionUID = 100L;
 }

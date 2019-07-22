@@ -157,4 +157,5 @@ public class QsoLogWindow extends JFrame {
     QsoActionMenu _actionMenu;
     QsoEditMenu _editMenu;
     QsoHelpMenu _helpMenu;
+    private static final long serialVersionUID = 100L;
 }

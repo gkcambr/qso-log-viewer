@@ -829,4 +829,5 @@ public class QsoActionMenu extends QsoMenu {
     private static final Integer USE_RULE = -1;
     private static final Integer DONT_USE_RULE = -2;
     private static final Integer DEFAULT_TIME_DIFF = 5; // five minutes
+    private static final long serialVersionUID = 100L;
 }

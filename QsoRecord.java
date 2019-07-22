@@ -126,10 +126,10 @@ public class QsoRecord {
         if (_fields != null) {
             Collection<String> col = _fields.values();
             String[] vals = new String[col.size()];
-            Iterator it = col.iterator();
+            Iterator<String> it = col.iterator();
             int i = 0;
             while (it.hasNext()) {
-                vals[i++] = (String) it.next();
+                vals[i++] = it.next();
             }
             str = vals[indx];
         }
@@ -156,10 +156,10 @@ public class QsoRecord {
         if (_fields != null) {
             Set<String> set = _fields.keySet();
             keys = new String[set.size()];
-            Iterator it = set.iterator();
+            Iterator<String> it = set.iterator();
             int i = 0;
             while (it.hasNext()) {
-                keys[i++] = (String) it.next();
+                keys[i++] = it.next();
             }
         }
         return keys;

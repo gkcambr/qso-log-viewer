@@ -35,4 +35,5 @@ public abstract class QsoMenu extends JMenu {
     
     // Properties
     QsoLogWindow _logWindow;
+    private static final long serialVersionUID = 100L;
 }
