@@ -98,7 +98,9 @@ public class QsoFileMenu extends QsoMenu {
                     try {
                         if (qsoFile != null) {
                             int noRecs = qsoFile.getNoRecords();
-                            _logWindow.setTitle(QsoLogWindow.TITLE + " - " + chooser.getSelectedFile().getName() + " - " + noRecs + " records");
+                            String title = String.format("%s - %s - %d records", 
+                            		QsoLogWindow.TITLE, chooser.getSelectedFile().getName(), noRecs);
+                            _logWindow.setTitle(title);
                             QsoPane panel = new QsoPane(qsoFile);
                             panel.setOpaque(true);
                             JPanel oldPanel = (JPanel) _logWindow.getContentPane();
@@ -142,8 +144,9 @@ public class QsoFileMenu extends QsoMenu {
                                         }
                                     }
                                 }
-                                JOptionPane.showOptionDialog(null, "" + tbl.getColumnCount() + " columns are in this table.\n"
-                                        + "To view them use the Action -> Edit Columns menus.", "Information",
+                                String optDlgMsg = String.format("%d columns are in this table.\n"
+                                        + "To view them use the Action -> Edit Columns menus.", tbl.getColumnCount());
+                                JOptionPane.showOptionDialog(null, optDlgMsg, "Information",
                                         JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                                         null, null, null);
                             }
@@ -265,7 +268,8 @@ public class QsoFileMenu extends QsoMenu {
         try {
             File out = new File(fullPathName);
             if (out.exists()) {
-                JOptionPane.showOptionDialog(null, "" + fullPathName + " exists.\nDelete or rename the file and try again.", "Aborted",
+            	String optDlgMsg = String.format("%s exists.\nDelete or rename the file and try again.", fullPathName);
+                JOptionPane.showOptionDialog(null, optDlgMsg, "Aborted",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                         null, null, null);
                 return;
@@ -295,15 +299,15 @@ public class QsoFileMenu extends QsoMenu {
                     writeCnt += 1;
                 }
             }
-            JOptionPane.showOptionDialog(null, "saved " + writeCnt + " records to " + saveFile.getName() 
-                    + ".", "Records Saved",
+            String optDlgMsg = String.format("saved %d records to %s.", writeCnt, saveFile.getName());
+            JOptionPane.showOptionDialog(null, optDlgMsg, "Records Saved",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                     null, null, null);
 
         } catch (IOException ex) {
             Logger.getLogger(QsoActionMenu.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showOptionDialog(null, "Unspecified error.\n"
-                    + "Cannot write to " + fullPathName + ".", "Aborted",
+            String optDlgMsg = String.format("Unspecified error.\nCannot write to %s.", fullPathName);
+            JOptionPane.showOptionDialog(null, optDlgMsg, "Aborted",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                     null, null, null);
         } finally {
@@ -313,8 +317,8 @@ public class QsoFileMenu extends QsoMenu {
                 }
             } catch (IOException ex) {
                 Logger.getLogger(QsoActionMenu.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showOptionDialog(null, "Unspecified error.\n"
-                        + "Cannot write to " + fullPathName + ".", "Aborted",
+                String optDlgMsg = String.format("Unspecified error.\nCannot write to %s.", fullPathName);
+                JOptionPane.showOptionDialog(null, optDlgMsg, "Aborted",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                         null, null, null);
             }
