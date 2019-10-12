@@ -56,9 +56,8 @@ public class QsoEditMenu extends QsoMenu {
                         int tmIndex = rs.convertRowIndexToModel(row[i]);
                         ((DefaultTableModel) tbl.getModel()).removeRow(tmIndex);
                     }
-                    String title = QsoLogWindow.TITLE + " - " + "Update list - "
-                            + ((QsoPane) _logWindow.getContentPane()).getTable().getRowCount()
-                            + " records.";
+                    String title = String.format("%s - Update list - %d records.", 
+                    		QsoLogWindow.TITLE, ((QsoPane) _logWindow.getContentPane()).getTable().getRowCount()) ;
                     _logWindow.setTitle(title);
                 } else {
                     // null qso file

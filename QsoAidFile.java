@@ -101,8 +101,9 @@ public class QsoAidFile extends QsoFile {
                         }
                     }
                     if (wrtr == null) {
-                        JOptionPane.showOptionDialog(null, "Error found in record " + _fileName + ".\n"
-                                + "check '" + _errFileName + "' for details\n", "Warning",
+                    	String optionDlgMsg = String.format("Error found in record %s.\n"
+                                + "check '%s' for details\n", _fileName, _errFileName);
+                        JOptionPane.showOptionDialog(null, optionDlgMsg, "Warning",
                                 JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                                 null, null, null);
                         try {

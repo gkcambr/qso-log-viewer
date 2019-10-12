@@ -457,7 +457,7 @@ public class QsoActionMenu extends QsoMenu {
                         notice = "One state is missing.\n" + missing;
                         break;
                     default:
-                        notice = "" + noMissing + " states are missing.\n" + missing;
+                        notice = String.format("%s states are missing.\n%s", noMissing, missing);
                         break;
                 }
                 JOptionPane.showOptionDialog(null, notice, "Information",
@@ -616,10 +616,9 @@ public class QsoActionMenu extends QsoMenu {
             // show the results
             String notice;
             if (noDupes > 0) {
-                notice = "" + noDupes + " duplicates were found and highlighted in the table.\n"
-                        + "Sort the table by call sign to group them.";
+                notice = String.format("%d duplicates were found and highlighted in the table.\nSort the table by call sign to group them.", noDupes);
             } else {
-                notice = "" + noDupes + " duplicates were found and highlighted in the table.";
+                notice = String.format("%d duplicates were found and highlighted in the table.", noDupes);
             }
             JOptionPane.showOptionDialog(null, notice, "Information",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
@@ -636,11 +635,12 @@ public class QsoActionMenu extends QsoMenu {
         // check for duplicates before beginning
         int noDupes = checkForDuplicates(false);
         if (noDupes > 0) {
-            int result = JOptionPane.showOptionDialog(null, "" + noDupes + " duplicate records found in " + openFile.getName() + ".\n"
+        	String optionDlgMsg = String.format("%s duplicate records found in %s\n"
                     + "Strongly recommend you run 'Find Duplicates' and\n"
                     + "remove them before re-running 'Compare'\n"
-                    + "\nHit CANCEL to abort Compare.", "Warning",
-                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
+                    + "\nHit CANCEL to abort Compare.",  noDupes, openFile.getName());
+            int result = JOptionPane.showOptionDialog(null, optionDlgMsg,
+            		"Warning", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE,
                     null, null, null);
             if (result != 0) {
                 return;
@@ -763,13 +763,15 @@ public class QsoActionMenu extends QsoMenu {
 
         // show the results
         Object[] options = {"OK", "CANCEL"};
-        JOptionPane.showOptionDialog(null, "" + noMissing + " records were found and highlighted in the table.\n"
-                + "These records are in " + ((QsoPane) _logWindow.getContentPane()).getQsoFile().getName()
-                + " but not in " + compareFile.getName() + ".\n"
+        String optionDlgMsg = String.format("%s records were found and highlighted in the table.\n"
+                + "These records are in %s"
+                + " but not in %s.\n"
                 + "If you want to prepare an update file edit the selected records\n"
                 + "by first selecting the menu item 'View -> Show Selected' . You can then\n"
                 + "edit that list and save the edited records using the 'File -> Save'\n"
                 + "menu item. Then you can import the updated file into your application.\n",
+                noMissing, ((QsoPane) _logWindow.getContentPane()).getQsoFile().getName(), compareFile.getName());
+        JOptionPane.showOptionDialog(null, optionDlgMsg,
                 "Information",
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                 null, options, 0);
