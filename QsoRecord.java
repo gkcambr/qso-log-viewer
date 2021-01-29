@@ -39,13 +39,14 @@ public class QsoRecord {
         QsoRecord rec = null;
         if (recStr.split("<", 100).length > 3) {
             rec = new QsoRecord();
+            rec._error = false;
+            rec._errStr = "";
             rec.parse(recStr);
         }
         return rec;
     }
 
-    QsoRecord parse(String recStr) throws NumberFormatException {
-        QsoRecord qsoRec = null;
+    void parse(String recStr) {
 
         // split into records on '<' boundaries
         String[] toks = recStr.split("<", 100);
@@ -75,7 +76,9 @@ public class QsoRecord {
                     int tl = tag.length;
                     tag[tl - 1] = tag[tl - 1].replaceFirst(">.*", "");
                     if (tag.length < 2 || tag.length > 3) {
-                        throw (new NumberFormatException("tag " + tag[0] + " has an invalid value length:\n" + recStr));
+                        _error = true;
+                        _errStr = "tag " + tag[0] + " has an invalid value length:\n" + recStr;
+                        return;
                     }
                     String id = tag[0].trim();
                     String length = tag[1].trim();
@@ -93,14 +96,14 @@ public class QsoRecord {
                     if (len != 0) {
                         int lenErr = abs(((len - value4test.length()) * 100) / len);
                         if (lenErr > 5) {
-                            throw (new NumberFormatException("tag " + tag[0] + " length does not match value length:\n" + recStr));
+                            _error = true;
+                            _errStr = "tag " + tag[0] + " length does not match value length:\n" + recStr;
                         }
                     }
                     put(id, values[n]);
                 }
             }
         }
-        return qsoRec;
     }
 
     public String put(String id, String value) {
@@ -186,9 +189,19 @@ public class QsoRecord {
         }
         return ret;
     }
+    
+    boolean getError() {
+        return _error;
+    }
+    
+    String getErrorStr() {
+        return _errStr;
+    }
 
     // Properties
     private final LinkedHashMap<String, String> _fields;
     private String _recIndex;
+    private boolean _error;
+    private String _errStr;
     static BufferedWriter _wrtr = null;
 }

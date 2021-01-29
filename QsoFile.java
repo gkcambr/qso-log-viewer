@@ -18,7 +18,6 @@ package qsologviewer;
 
 import java.io.File;
 import java.util.Stack;
-import static qsologviewer.QsoAidFile._errFileName;
 
 /**
  *
@@ -41,7 +40,12 @@ abstract class QsoFile {
         File in = new File(fname);
         _fileName = in.getName();
         _filePathName = in.getCanonicalPath();
-        _errFileName = _fileName.toLowerCase().replace("adi", "err");
+        if(_fileName.toLowerCase().endsWith(".adi")) {
+            _errFileName = _fileName.substring(0, _fileName.length() - 4) + ".err";
+        }
+        else {
+            _errFileName = _fileName + ".err";
+        }
         if (in.exists() && in.isFile()) {
             int noRecs;
             noRecs = parse();
@@ -149,5 +153,5 @@ abstract class QsoFile {
     protected String _fileVersion;
     protected Stack<String> _columnNames;
     public static final String QLV_INDEX_KEY = "OlvIndex";
-    static String _errFileName = "";
+    static String _errFileName = "qsoViewer.err";
 }

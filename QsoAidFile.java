@@ -58,23 +58,37 @@ public class QsoAidFile extends QsoFile {
         while ((line = rdr.readLine()) != null) {
             String trimLine = line.trim();
             if (eoh == false) {
-                // look for the end of header
-                if (trimLine.equalsIgnoreCase("<eoh>")) {
-                    eoh = true;
-                    continue;
-                }
+                
                 // concatenate lines until header is found
                 _header = _header.concat(line + "\n");
-                if (line.compareToIgnoreCase("PROGRAMID") == 0) {
-                    String[] tokens = line.split(">");
-                    if (tokens.length == 2) {
+                int indx = trimLine.toUpperCase().indexOf("PROGRAMID");
+                if (indx > -1) {
+                    String[] tokens = trimLine.substring(indx).split(">");
+                    if (tokens.length >= 2) {
                         _fileType = tokens[1];
+                        int eostr = _fileType.indexOf("<");
+                        if(eostr > -1) {
+                            _fileType = _fileType.substring(0, eostr);
+                            _fileType = _fileType.trim();
+                        }
                     }
-                } else if (line.compareToIgnoreCase("ADIF_Ver") == 0) {
-                    String[] tokens = line.split(">");
-                    if (tokens.length == 2) {
+                }
+                indx = trimLine.toUpperCase().indexOf("ADIF_VER");
+                if (indx > -1) {
+                    String[] tokens = trimLine.substring(indx).split(">");
+                    if (tokens.length >= 2) {
                         _fileVersion = tokens[1];
+                        int eostr = _fileVersion.indexOf("<");
+                        if(eostr > -1) {
+                            _fileVersion = _fileVersion.substring(0, eostr);
+                            _fileVersion = _fileVersion.trim();
+                        }
                     }
+                }
+                // look for the end of header
+                indx = trimLine.toUpperCase().indexOf("<EOH>");
+                if (indx > -1) {
+                    eoh = true;
                 }
                 continue;
             }
@@ -84,10 +98,9 @@ public class QsoAidFile extends QsoFile {
             if (trimLine.endsWith("<EOR>") || trimLine.endsWith("<eor>")) {
                 QsoRecord rec = null;
                 String listStr = "";
-                try {
-                    rec = QsoRecord.create(record);
-                } catch (NumberFormatException ex) {
-                    String[] errMsg = ex.getMessage().split("\n");
+                rec = QsoRecord.create(record);
+                if(rec != null & rec.getError()) {
+                    String[] errMsg = rec.getErrorStr().split("\n");
                     if (errMsg.length > 1) {
                         String[] recList = errMsg[1].split("<");
                         for (int i = 0; i < recList.length; i++) {
@@ -100,22 +113,33 @@ public class QsoAidFile extends QsoFile {
                             }
                         }
                     }
-                    if (wrtr == null) {
-                        JOptionPane.showOptionDialog(null, "Error found in record " + _fileName + ".\n"
-                                + "check '" + _errFileName + "' for details\n", "Warning",
-                                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-                                null, null, null);
+                    if (wrtr == null && _warningIssued == false) {
+                        int opt = JOptionPane.showConfirmDialog(null, "Error found in " + _fileName + ".\n"
+                                + "check '" + _errFileName + "' for details\n\nIgnore warnings?", "Warning", JOptionPane.YES_NO_OPTION);
+                        if(opt == JOptionPane.NO_OPTION) {
+                            _ignoreWarnings = false;
+                        }
+                        _warningIssued = true;
+                        QsoInitFile qsf = QsoInitFile.getInstance();
+                        String qsfName = null;
+                        if(qsf != null) {
+                            qsfName = qsf.getLastFileDir() + File.separator + QsoFile.getErrFileName();
+                        }
+                        if(qsfName == null) {
+                            qsfName = System.getProperty("user.home") + File.separator + QsoFile.getErrFileName();
+                        }
+                        if(qsfName != null) {
                         try {
                             wrtr = new BufferedWriter(
                                     new OutputStreamWriter(
                                             new FileOutputStream(
-                                                    QsoInitFile.getInstance().getLastFileDir()
-                                                    + File.separator + _errFileName, true),
+                                                    qsfName, true),
                                             "ISO-8859-1"));
 
                         } catch (UnsupportedEncodingException
                                 | FileNotFoundException ex1) {
                             Logger.getLogger(QsoRecord.class.getName()).log(Level.SEVERE, null, ex1);
+                        }
                         }
                     }
                     try {
@@ -134,7 +158,7 @@ public class QsoAidFile extends QsoFile {
                         Logger.getLogger(QsoRecord.class.getName()).log(Level.SEVERE, null, ex1);
                     }
                 }
-                if (rec != null) {
+                if (rec.getError() == false || _ignoreWarnings) {
                     rec.setIndex(_records.size());
                     _records.add(rec);
                     ret += 1;
@@ -153,4 +177,6 @@ public class QsoAidFile extends QsoFile {
     }
 
     // Properties
+    boolean _ignoreWarnings = true;
+    boolean _warningIssued = false;
 }
